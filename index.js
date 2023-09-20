@@ -93,7 +93,23 @@ io.on("connection", (socket) => {
   socket.on("chat-message", (message) => {
     console.log(`Mensaje recibido del cliente: ${message}`);
     const respuestaVentas = seleccionarRespuestaVenta(message);
-    io.to(socket.id).emit("chat-message", respuestaVentas); // Enviar la respuesta al cliente
+    io.to(socket.id).emit("chat-message-response", respuestaVentas); // Enviar la respuesta al cliente
+  });
+
+  socket.on("image-upload", (base64Data) => {
+    try {
+      // Decodifica el archivo base64
+      const decodedData = atob(base64Data.split(",")[1]);
+
+      // Guarda el archivo en el servidor (por ejemplo, como un archivo .txt)
+      fs.writeFileSync("archivo_recibido.txt", decodedData);
+
+      // Envía una respuesta al cliente
+      io.to(socket.id).emit("image-upload-response", "Imagen cargada exitosamente.");
+    } catch (error) {
+      console.error("Error al procesar el archivo:", error);
+      io.to(socket.id).emit("image-response", "Error al cargar el archivo.");
+    }
   });
 
   socket.on("file-upload", (base64Data) => {
